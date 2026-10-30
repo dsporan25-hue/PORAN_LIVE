@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">PORAN LIVE</string>
+    <string name="title_activity_main">PORAN LIVE</string>
+    <string name="package_name">com.poran.live</string>
+    <string name="custom_url_scheme">com.poran.live</string>
+</resources>
