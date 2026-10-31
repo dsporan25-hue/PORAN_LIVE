@@ -1,7 +1,10 @@
 import React, { useRef, useState } from 'react';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { createRoot } from 'react-dom/client';
 import { Share } from '@capacitor/share';
 import './style.css';
+
+const PoranStreaming = registerPlugin("PoranStreaming");
 
 function App() {
   const picker = useRef(null);
@@ -16,8 +19,19 @@ function App() {
     () => Number(localStorage.getItem('poran_like_count') || 0)
   );
 
-  const chooseVideo = () => {
-    picker.current?.click();
+  const chooseVideo = async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const result = await PoranStreaming.pickVideo();
+        if (result.cancelled || !result.videoUri) return;
+        setVideo(Capacitor.convertFileSrc(result.videoUri));
+        setMessage("VIDEO SELECTED — READY");
+      } catch (error) {
+        setMessage("VIDEO PICKER FAILED");
+      }
+    } else {
+      picker.current?.click();
+    }
   };
 
   const handleVideo = (e) => {
