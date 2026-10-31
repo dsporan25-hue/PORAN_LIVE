@@ -10,6 +10,10 @@ function App() {
   const picker = useRef(null);
   const [video, setVideo] = useState('');
   const [message, setMessage] = useState('SYSTEM READY');
+  const [serverUrl, setServerUrl] = useState('');
+  const [streamKey, setStreamKey] = useState('');
+  const [isLive, setIsLive] = useState(false);
+  const [showLivePanel, setShowLivePanel] = useState(false);
 
   const [liked, setLiked] = useState(
     () => localStorage.getItem('poran_liked') === 'true'
@@ -74,8 +78,43 @@ function App() {
     }
   };
 
-  const startScreenLive = () => {
-    setMessage('SCREEN BROADCAST SETUP IS NEXT');
+  const startScreenLive = async () => {
+    const server = serverUrl.trim().replace(/\/+$/, "");
+    const key = streamKey.trim();
+    if (!server.startsWith("rtmp://") && !server.startsWith("rtmps://")) {
+      setMessage("ENTER A VALID FACEBOOK RTMP SERVER URL");
+      return;
+    }
+    if (!key) {
+      setMessage("ENTER YOUR FACEBOOK STREAM KEY");
+      return;
+    }
+    if (!Capacitor.isNativePlatform()) {
+      setMessage("SCREEN LIVE REQUIRES THE ANDROID APP");
+      return;
+    }
+    try {
+      setMessage("REQUESTING SCREEN CAPTURE PERMISSION");
+      const result = await PoranStreaming.startScreenLive({ streamUrl: server + "/" + key });
+      if (result.cancelled) {
+        setMessage("SCREEN CAPTURE CANCELLED");
+        return;
+      }
+      setIsLive(true);
+      setMessage("SCREEN BROADCAST START REQUESTED");
+    } catch (error) {
+      setMessage("LIVE START FAILED: " + (error.message || "UNKNOWN ERROR"));
+    }
+  };
+
+  const stopScreenLive = async () => {
+    try {
+      await PoranStreaming.stopScreenLive();
+      setIsLive(false);
+      setMessage("SCREEN BROADCAST STOP REQUESTED");
+    } catch (error) {
+      setMessage("LIVE STOP FAILED: " + (error.message || "UNKNOWN ERROR"));
+    }
   };
 
   return (
@@ -97,7 +136,7 @@ function App() {
 
       <section className="modes">
         <button onClick={chooseVideo}>▣ Gallery Live</button>
-        <button onClick={startScreenLive}>▦ Full Screen Live</button>
+        <button onClick={() => setShowLivePanel(v => !v)}>▦ Full Screen Live</button>
         <input
           ref={picker}
           type="file"
@@ -106,6 +145,20 @@ function App() {
           onChange={handleVideo}
         />
       </section>
+
+      {showLivePanel && (
+        <section className="facebook">
+          <h3>Full Screen Live Control</h3>
+          <p>Enter your Facebook Live streaming details.</p>
+          <label>Facebook Server URL</label>
+          <input className="live-input" type="url" placeholder="rtmps://..." value={serverUrl} onChange={e => setServerUrl(e.target.value)} />
+          <label>Facebook Stream Key</label>
+          <input className="live-input" type="password" placeholder="Enter your private stream key" value={streamKey} onChange={e => setStreamKey(e.target.value)} autoComplete="off" />
+          <button className="connect" onClick={startScreenLive} disabled={isLive}>Start Live</button>
+          <button className="live-stop" onClick={stopScreenLive} disabled={!isLive}>Stop Live</button>
+          <p>Stream key stays in app memory and is not displayed.</p>
+        </section>
+      )}
 
       {video && (
         <section className="facebook">

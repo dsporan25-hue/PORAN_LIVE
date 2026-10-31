@@ -142,3 +142,5 @@ footer {
   color: #607789;
   font-size: 11px;
 }
+
+.live-input{width:100%;padding:15px;margin:9px 0 18px;border:1px solid #17617a;border-radius:12px;background:#06111e;color:#eafaff;font-size:14px;outline:none}.live-input:focus{border-color:#00eaff;box-shadow:0 0 12px #00eaff33}.facebook label{display:block;color:#8ddbea;font-size:12px;font-weight:bold}.live-stop{width:100%;margin-top:12px;background:#421b29;border:1px solid #ff526b;color:#fff}.facebook button:disabled{opacity:.4;cursor:not-allowed}
