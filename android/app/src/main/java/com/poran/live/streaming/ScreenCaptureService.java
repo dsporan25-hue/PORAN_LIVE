@@ -103,6 +103,8 @@ public class ScreenCaptureService extends Service implements ConnectChecker {
             }
         );
 
+        rtmpDisplay.setIntentResult(resultCode, data);
+
         boolean prepared = rtmpDisplay.prepareVideo(
             width, height, 30, 2000000, 0, dpi
         );
@@ -111,7 +113,11 @@ public class ScreenCaptureService extends Service implements ConnectChecker {
             throw new RuntimeException("Video encoder preparation failed");
         }
 
-        rtmpDisplay.setIntentResult(resultCode, data);
+        boolean audioPrepared = rtmpDisplay.prepareAudio();
+        if (!audioPrepared) {
+            throw new RuntimeException("Microphone audio preparation failed");
+        }
+
         rtmpDisplay.startStream(url);
     }
 
@@ -147,7 +153,14 @@ public class ScreenCaptureService extends Service implements ConnectChecker {
             .setOngoing(true)
             .build();
 
-        if (Build.VERSION.SDK_INT >= 29) {
+        if (Build.VERSION.SDK_INT >= 30) {
+            startForeground(
+                NOTIFICATION_ID,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+                    | ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+            );
+        } else if (Build.VERSION.SDK_INT >= 29) {
             startForeground(
                 NOTIFICATION_ID,
                 notification,

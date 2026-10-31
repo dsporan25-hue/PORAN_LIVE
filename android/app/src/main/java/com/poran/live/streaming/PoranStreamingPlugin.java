@@ -11,12 +11,16 @@ import androidx.activity.result.ActivityResult;
 
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
+import com.getcapacitor.PermissionState;
+import com.getcapacitor.annotation.PermissionCallback;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.annotation.ActivityCallback;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import com.getcapacitor.annotation.Permission;
+import android.Manifest;
 import com.getcapacitor.PluginMethod;
 
-@CapacitorPlugin(name = "PoranStreaming")
+@CapacitorPlugin(name = "PoranStreaming", permissions = {@Permission(strings = {Manifest.permission.RECORD_AUDIO}, alias = "Microphone")})
 public class PoranStreamingPlugin extends Plugin {
 
     private String pendingStreamUrl;
@@ -69,6 +73,28 @@ public class PoranStreamingPlugin extends Plugin {
 
         pendingStreamUrl = streamUrl;
 
+        if (getPermissionState("Microphone") != PermissionState.GRANTED) {
+            requestPermissionForAlias("Microphone", call, "microphonePermissionResult");
+            return;
+        }
+
+        launchScreenCapture(call);
+    }
+
+    @PermissionCallback
+    private void microphonePermissionResult(PluginCall call) {
+        if (call == null) return;
+
+        if (getPermissionState("Microphone") != PermissionState.GRANTED) {
+            pendingStreamUrl = null;
+            call.reject("Microphone permission is required to start a voice broadcast.");
+            return;
+        }
+
+        launchScreenCapture(call);
+    }
+
+    private void launchScreenCapture(PluginCall call) {
         MediaProjectionManager manager =
             (MediaProjectionManager) getContext().getSystemService(
                 Context.MEDIA_PROJECTION_SERVICE
