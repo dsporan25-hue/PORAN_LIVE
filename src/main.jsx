@@ -1,11 +1,20 @@
 import React, { useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import { Share } from '@capacitor/share';
 import './style.css';
 
 function App() {
   const picker = useRef(null);
   const [video, setVideo] = useState('');
   const [message, setMessage] = useState('SYSTEM READY');
+
+  const [liked, setLiked] = useState(
+    () => localStorage.getItem('poran_liked') === 'true'
+  );
+
+  const [likeCount, setLikeCount] = useState(
+    () => Number(localStorage.getItem('poran_like_count') || 0)
+  );
 
   const chooseVideo = () => {
     picker.current?.click();
@@ -25,8 +34,34 @@ function App() {
     setMessage('VIDEO SELECTED — READY');
   };
 
+  const toggleLike = () => {
+    const nextLiked = !liked;
+    const nextCount = Math.max(0, likeCount + (nextLiked ? 1 : -1));
+
+    setLiked(nextLiked);
+    setLikeCount(nextCount);
+
+    localStorage.setItem('poran_liked', String(nextLiked));
+    localStorage.setItem('poran_like_count', String(nextCount));
+
+    setMessage(nextLiked ? 'YOU LIKED PORAN LIVE' : 'LIKE REMOVED');
+  };
+
+  const shareFacebook = async () => {
+    try {
+      await Share.share({
+        title: 'PORAN LIVE',
+        text: 'Check out PORAN LIVE — Your Screen. Your Live. Your World!',
+        dialogTitle: 'Share PORAN LIVE'
+      });
+      setMessage('SHARE MENU OPENED');
+    } catch (error) {
+      setMessage('SHARING CANCELLED OR UNAVAILABLE');
+    }
+  };
+
   const startScreenLive = () => {
-    setMessage('SCREEN LIVE FEATURE IS UNDER DEVELOPMENT');
+    setMessage('SCREEN BROADCAST SETUP IS NEXT');
   };
 
   return (
@@ -72,14 +107,25 @@ function App() {
       )}
 
       <section className="facebook">
-        <h3>Facebook Connection</h3>
-        <p>Facebook Live connection is not configured yet.</p>
-        <button
-          className="connect"
-          onClick={() => setMessage('FACEBOOK STREAMING SETUP REQUIRED')}
-        >
-          Connect Facebook
+        <h3>Like PORAN LIVE</h3>
+        <p>Support the app with a Like.</p>
+        <button className="connect" onClick={toggleLike}>
+          {liked ? '♥ Liked' : '♡ Like'} · {likeCount}
         </button>
+        <p style={{ fontSize: '11px' }}>
+          This Like count is saved on this device.
+        </p>
+      </section>
+
+      <section className="facebook">
+        <h3>Share PORAN LIVE</h3>
+        <p>Open Android's share menu to share the app with others.</p>
+        <button className="connect" onClick={shareFacebook}>
+          Share with Facebook
+        </button>
+        <p style={{ fontSize: '11px' }}>
+          This shares app information, not the selected video file.
+        </p>
       </section>
 
       <footer>PORAN LIVE • VERSION 1.0</footer>
