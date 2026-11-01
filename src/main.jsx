@@ -38,7 +38,7 @@ function App() {
         setMessage((status === 'AUTH_FAILED' ? 'FACEBOOK AUTH FAILED: ' : 'STREAM FAILED: ') + (event.reason || 'CONNECTION ERROR'));
       } else if (status === 'DISCONNECTED') {
         setIsLive(false);
-        setMessage('STREAM DISCONNECTED');
+        setMessage('STREAM DISCONNECTED: ' + (event.reason || 'UNKNOWN REASON'));
       }
     }).then(handle => {
       listenerHandle = handle;

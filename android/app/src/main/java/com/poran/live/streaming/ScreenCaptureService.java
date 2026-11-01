@@ -29,6 +29,7 @@ public class ScreenCaptureService extends Service implements ConnectChecker {
     private static final int NOTIFICATION_ID = 7001;
 
     private RtmpDisplay rtmpDisplay;
+    private String lastConnectionError = null;
 
     @Override
     public void onCreate() {
@@ -211,6 +212,7 @@ public class ScreenCaptureService extends Service implements ConnectChecker {
 
     @Override
     public void onConnectionFailed(String reason) {
+        lastConnectionError = reason;
         sendStatus("FAILED", reason);
         android.util.Log.e("PORAN_LIVE", reason);
         stopStreaming();
@@ -219,7 +221,7 @@ public class ScreenCaptureService extends Service implements ConnectChecker {
 
     @Override
     public void onDisconnect() {
-        sendStatus("DISCONNECTED", null);
+        sendStatus("DISCONNECTED", lastConnectionError == null ? "RTMP connection closed; no failure reason received" : lastConnectionError);
         android.util.Log.d("PORAN_LIVE", "Disconnected");
     }
 
