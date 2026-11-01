@@ -20,6 +20,13 @@ function App() {
     let listenerHandle;
     PoranStreaming.addListener('streamStatus', event => {
       const status = event.status;
+      if (status === "SERVICE_STARTED") {
+        setMessage("SCREEN SERVICE STARTED...");
+      } else if (status === "VIDEO_PREPARED") {
+        setMessage("SCREEN VIDEO READY...");
+      } else if (status === "STREAM_START_REQUESTED") {
+        setMessage("CONNECTING TO FACEBOOK RTMP...");
+      } else
       if (status === 'CONNECTING') {
         setIsLive(false);
         setMessage('CONNECTING TO FACEBOOK...');

@@ -56,6 +56,7 @@ public class ScreenCaptureService extends Service implements ConnectChecker {
         }
 
         startLiveNotification();
+        sendStatus("SERVICE_STARTED", "Android screen service started");
 
         int resultCode = intent.getIntExtra(EXTRA_RESULT_CODE, 0);
         Intent projectionData = intent.getParcelableExtra(EXTRA_DATA);
@@ -116,6 +117,7 @@ public class ScreenCaptureService extends Service implements ConnectChecker {
         if (!prepared) {
             throw new RuntimeException("Video encoder preparation failed");
         }
+        sendStatus("VIDEO_PREPARED", "Screen video encoder is ready");
 
         try {
             rtmpDisplay.prepareAudio();
@@ -123,6 +125,7 @@ public class ScreenCaptureService extends Service implements ConnectChecker {
             android.util.Log.e("PORAN_LIVE", "Microphone unavailable; continuing without audio", audioError);
         }
 
+        sendStatus("STREAM_START_REQUESTED", "Connecting to Facebook RTMP");
         rtmpDisplay.startStream(url);
     }
 

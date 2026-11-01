@@ -97,11 +97,6 @@ public class PoranStreamingPlugin extends Plugin {
 
         pendingStreamUrl = streamUrl;
 
-        if (getPermissionState("Microphone") != PermissionState.GRANTED) {
-            requestPermissionForAlias("Microphone", call, "microphonePermissionResult");
-            return;
-        }
-
         launchScreenCapture(call);
     }
 
