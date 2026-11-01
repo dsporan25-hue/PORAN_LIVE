@@ -2,6 +2,8 @@ package com.poran.live.streaming;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
 import android.content.Intent;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
@@ -24,6 +26,28 @@ import com.getcapacitor.PluginMethod;
 public class PoranStreamingPlugin extends Plugin {
 
     private String pendingStreamUrl;
+    private BroadcastReceiver statusReceiver;
+
+    @Override
+    public void load() {
+        super.load();
+        statusReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                JSObject data = new JSObject();
+                data.put("status", intent.getStringExtra("status"));
+                data.put("reason", intent.getStringExtra("reason"));
+                notifyListeners("streamStatus", data);
+            }
+        };
+
+        IntentFilter filter = new IntentFilter("com.poran.live.STREAM_STATUS");
+        if (Build.VERSION.SDK_INT >= 33) {
+            getContext().registerReceiver(statusReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            getContext().registerReceiver(statusReceiver, filter);
+        }
+    }
 
     @PluginMethod
     public void pickVideo(PluginCall call) {

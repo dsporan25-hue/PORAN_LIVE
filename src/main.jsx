@@ -17,6 +17,33 @@ function App() {
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
+    let listenerHandle;
+    PoranStreaming.addListener('streamStatus', event => {
+      const status = event.status;
+      if (status === 'CONNECTING') {
+        setIsLive(false);
+        setMessage('CONNECTING TO FACEBOOK...');
+      } else if (status === 'CONNECTED') {
+        setIsLive(true);
+        setMessage('FACEBOOK RTMP CONNECTED');
+      } else if (status === 'FAILED' || status === 'AUTH_FAILED') {
+        setIsLive(false);
+        setMessage((status === 'AUTH_FAILED' ? 'FACEBOOK AUTH FAILED: ' : 'STREAM FAILED: ') + (event.reason || 'CONNECTION ERROR'));
+      } else if (status === 'DISCONNECTED') {
+        setIsLive(false);
+        setMessage('STREAM DISCONNECTED');
+      }
+    }).then(handle => {
+      listenerHandle = handle;
+    }).catch(() => setMessage('STATUS LISTENER FAILED'));
+
+    return () => {
+      if (listenerHandle) listenerHandle.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
     SecureStore.getConfig()
       .then(result => {
         if (result.configured) {
@@ -90,8 +117,7 @@ function App() {
         setMessage('SCREEN CAPTURE CANCELLED');
         return;
       }
-      setIsLive(true);
-      setMessage('SCREEN BROADCAST START REQUESTED');
+      setMessage('WAITING FOR FACEBOOK CONNECTION...');
     } catch (error) {
       setMessage('LIVE START FAILED: ' + (error.message || 'UNKNOWN ERROR'));
     } finally {

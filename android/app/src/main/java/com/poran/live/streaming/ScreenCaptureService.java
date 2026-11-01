@@ -182,18 +182,29 @@ public class ScreenCaptureService extends Service implements ConnectChecker {
         }
     }
 
+    private void sendStatus(String status, String reason) {
+        Intent intent = new Intent("com.poran.live.STREAM_STATUS");
+        intent.setPackage(getPackageName());
+        intent.putExtra("status", status);
+        if (reason != null) intent.putExtra("reason", reason);
+        sendBroadcast(intent);
+    }
+
     @Override
     public void onConnectionStarted(String url) {
+        sendStatus("CONNECTING", null);
         android.util.Log.d("PORAN_LIVE", "Connecting");
     }
 
     @Override
     public void onConnectionSuccess() {
+        sendStatus("CONNECTED", null);
         android.util.Log.d("PORAN_LIVE", "Connected");
     }
 
     @Override
     public void onConnectionFailed(String reason) {
+        sendStatus("FAILED", reason);
         android.util.Log.e("PORAN_LIVE", reason);
         stopStreaming();
         stopSelf();
@@ -201,11 +212,13 @@ public class ScreenCaptureService extends Service implements ConnectChecker {
 
     @Override
     public void onDisconnect() {
+        sendStatus("DISCONNECTED", null);
         android.util.Log.d("PORAN_LIVE", "Disconnected");
     }
 
     @Override
     public void onAuthError() {
+        sendStatus("AUTH_FAILED", "Facebook authentication failed");
         android.util.Log.e("PORAN_LIVE", "Authentication failed");
     }
 
