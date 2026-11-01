@@ -62,6 +62,8 @@ public class ScreenCaptureService extends Service implements ConnectChecker {
         String streamUrl = intent.getStringExtra(EXTRA_URL);
 
         if (projectionData == null || streamUrl == null || streamUrl.isEmpty()) {
+            sendStatus("FAILED", "Screen capture data or stream URL is missing");
+            android.util.Log.e("PORAN_LIVE", "Screen capture data or stream URL is missing");
             stopSelf();
             return START_NOT_STICKY;
         }
@@ -69,6 +71,8 @@ public class ScreenCaptureService extends Service implements ConnectChecker {
         try {
             startStreaming(resultCode, projectionData, streamUrl);
         } catch (Exception e) {
+            android.util.Log.e("PORAN_LIVE", "STREAM START ERROR", e);
+            sendStatus("FAILED", e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage());
             stopStreaming();
             stopSelf();
         }
@@ -113,9 +117,10 @@ public class ScreenCaptureService extends Service implements ConnectChecker {
             throw new RuntimeException("Video encoder preparation failed");
         }
 
-        boolean audioPrepared = rtmpDisplay.prepareAudio();
-        if (!audioPrepared) {
-            throw new RuntimeException("Microphone audio preparation failed");
+        try {
+            rtmpDisplay.prepareAudio();
+        } catch (Exception audioError) {
+            android.util.Log.e("PORAN_LIVE", "Microphone unavailable; continuing without audio", audioError);
         }
 
         rtmpDisplay.startStream(url);
@@ -158,7 +163,6 @@ public class ScreenCaptureService extends Service implements ConnectChecker {
                 NOTIFICATION_ID,
                 notification,
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
-                    | ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
             );
         } else if (Build.VERSION.SDK_INT >= 29) {
             startForeground(
