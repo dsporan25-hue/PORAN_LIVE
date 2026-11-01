@@ -144,3 +144,56 @@ footer {
 }
 
 .live-input{width:100%;padding:15px;margin:9px 0 18px;border:1px solid #17617a;border-radius:12px;background:#06111e;color:#eafaff;font-size:14px;outline:none}.live-input:focus{border-color:#00eaff;box-shadow:0 0 12px #00eaff33}.facebook label{display:block;color:#8ddbea;font-size:12px;font-weight:bold}.live-stop{width:100%;margin-top:12px;background:#421b29;border:1px solid #ff526b;color:#fff}.facebook button:disabled{opacity:.4;cursor:not-allowed}
+
+.main-control {
+  margin-top: 42px;
+  text-align: center;
+}
+
+.main-live-button {
+  width: 100%;
+  min-height: 66px;
+  border: 1px solid #00eaff;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #087b9a, #06415c);
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  box-shadow: 0 0 24px #00eaff44;
+}
+
+.main-live-button:active {
+  transform: scale(0.98);
+  background: #07536a;
+}
+
+.main-live-button.stop-mode {
+  background: linear-gradient(135deg, #a91e3d, #541629);
+  border-color: #ff526b;
+  box-shadow: 0 0 24px #ff526b44;
+}
+
+.main-live-button:disabled {
+  opacity: 0.65;
+}
+
+.main-control p {
+  color: #91a8b8;
+  font-size: 12px;
+  margin-top: 14px;
+}
+
+.logo {
+  cursor: pointer;
+}
+
+.reactor-live {
+  box-shadow: 0 0 35px #00eaffaa, inset 0 0 30px #00eaff66;
+  animation: reactorPulse 1.5s infinite alternate;
+}
+
+@keyframes reactorPulse {
+  from { box-shadow: 0 0 20px #00eaff55; }
+  to { box-shadow: 0 0 45px #00eaffbb; }
+}
